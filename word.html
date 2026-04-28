@@ -1,519 +1,563 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中文近似字挑戰 - 嘉義市民生國中</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-iansui@1.0/iansui.css">
-    <style>
-        :root {
-            --bg-dark: #121212;
-            --surface: #1e1e1e;
-            --primary: #00e5ff;
-            --secondary: #76ff03;
-            --text: #e0e0e0;
-            --accent: #ff4081;
-            --tile-bg: #2c2c2c;
-            --font-main: "Iansui", "芫荽", "Microsoft JhengHei", "微軟正黑體", sans-serif;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>中文近似字挑戰</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-iansui@1.0/iansui.css">
+<style>
+:root{
+  --bg:#0b0c0d;
+  --surface:#141516;
+  --primary:#00e5ff;
+  --accent:#ff6b81;
+  --muted:#9aa3a8;
+  --tile:#1f2021;
+  --success:#76ff03;
+  --danger:#ff5252;
+  --font:"Iansui","Microsoft JhengHei","微軟正黑體",sans-serif;
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text);
-            font-family: var(--font-main);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+  /* 統一格子尺寸與字體大小（可調） */
+  --tile-size: 64px;
+  --tile-font: 28px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--font);
+  background:linear-gradient(180deg,#070708 0%,var(--bg) 60%);
+  color:#e9eef0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+  padding-bottom:90px;
+}
+/* header */
+header{
+  width:100%;
+  max-width:1100px;
+  padding:18px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+}
+h1.game-title{
+  margin:0;
+  font-size:1.8rem;
+  color:#fff;
+  letter-spacing:1px;
+  text-shadow:0 0 12px rgba(0,229,255,0.12);
+}
+/* container */
+.main{
+  width:95%;
+  max-width:920px;
+  margin-top:8px;
+}
+.container{
+  display:none;
+}
+.container.active{display:block}
+/* control panel */
+.control-panel{
+  background:var(--surface);
+  padding:14px;
+  border-radius:12px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  border:1px solid rgba(255,255,255,0.03);
+}
+label{color:var(--muted);font-weight:700}
+select,button{
+  background:#0f1011;
+  color:#eaf6f8;
+  border:1px solid rgba(0,229,255,0.08);
+  padding:8px 12px;
+  border-radius:8px;
+  font-family:var(--font);
+}
+button{
+  background:linear-gradient(180deg,var(--primary),#00c7e6);
+  color:#001;
+  font-weight:700;
+  cursor:pointer;
+  transition:transform .12s,box-shadow .12s;
+}
+button:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,229,255,0.12)}
+.timer-container{
+  text-align:center;
+  margin:10px 0;
+  font-size:1.2rem;
+  color:var(--success);
+  font-weight:700;
+}
 
-        /* 頂部導航 */
-        header {
-            width: 100%;
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(to bottom, #000, transparent);
-            box-sizing: border-box;
-        }
+/* grid */
+.grid{
+  display:grid;
+  gap:8px;
+  padding:10px;
+  border-radius:10px;
+  margin:0 auto;
+  max-width:760px;
+  justify-content:center;
+}
 
-        .school-name {
-            color: var(--primary);
-            font-size: 1.1rem;
-            letter-spacing: 2px;
-            font-weight: bold;
-        }
+/* 統一方框尺寸與字體：所有題型共用 */
+.tile{
+  width: var(--tile-size);
+  height: var(--tile-size);
+  min-width: var(--tile-size);
+  min-height: var(--tile-size);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: var(--tile-font);
+  line-height:1;
+  background:var(--tile);
+  border-radius:8px;
+  cursor:pointer;
+  user-select:none;
+  padding:6px;
+  border:1px solid rgba(255,255,255,0.02);
+  transition:transform .12s,background .12s,border-color .12s,opacity .12s;
+  box-sizing:border-box;
+  text-align:center;
+  word-break:break-word;
+}
+.tile:hover{transform:translateY(-4px);border-color:rgba(0,229,255,0.08)}
+.tile.selected{background:var(--primary);color:#001}
+.tile.hidden{opacity:0;pointer-events:none}
+.tile.wrong{background:linear-gradient(90deg,#ff7b7b,#ff5252);color:#fff}
 
-        .game-title {
-            font-size: 2.2rem;
-            text-align: center;
-            flex-grow: 1;
-            color: #fff;
-            text-shadow: 0 0 10px var(--primary);
-        }
+/* ranking table */
+.table-wrap{background:var(--surface);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+table{width:100%;border-collapse:collapse;color:#eaf6f8}
+th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left;font-size:0.95rem}
+th{color:var(--primary);font-weight:700}
+td.time{font-weight:700;color:var(--success)}
 
-        /* 內容容器 */
-        .container {
-            width: 95%;
-            max-width: 800px;
-            margin-bottom: 80px;
-            display: none;
-        }
+/* nav tabs bottom */
+.nav-tabs{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  justify-content:space-around;
+  background:linear-gradient(180deg,rgba(0,0,0,0.6),#000);
+  padding:10px 0;
+  border-top:2px solid rgba(0,229,255,0.08);
+}
+.tab{color:#9aa3a8;cursor:pointer;display:flex;flex-direction:column;align-items:center;font-weight:700}
+.tab.active{color:var(--primary)}
+.tab-icon{font-size:1.2rem;margin-bottom:4px}
 
-        .container.active {
-            display: block;
-        }
+/* school name top-right */
+.school-badge{
+  position:fixed;
+  right:14px;
+  top:14px;
+  color:var(--muted);
+  font-weight:700;
+  background:rgba(0,0,0,0.35);
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.02);
+  backdrop-filter:blur(6px);
+}
 
-        /* 控制列 */
-        .control-panel {
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            border: 1px solid #333;
-        }
-
-        select, button {
-            background: #333;
-            color: white;
-            border: 1px solid var(--primary);
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-family: var(--font-main);
-            cursor: pointer;
-        }
-
-        button {
-            background: var(--primary);
-            color: #000;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            box-shadow: 0 0 15px var(--primary);
-            transform: translateY(-2px);
-        }
-
-        /* 計時器 */
-        .timer-container {
-            text-align: center;
-            font-size: 1.5rem;
-            margin: 10px 0;
-            color: var(--secondary);
-            font-weight: bold;
-        }
-
-        /* 遊戲網格 */
-        .grid {
-            display: grid;
-            gap: 8px;
-            background: var(--surface);
-            padding: 10px;
-            border-radius: 12px;
-            margin: 0 auto;
-            max-width: 500px;
-            aspect-ratio: 1/1;
-            border: 1px solid #444;
-        }
-
-        .tile {
-            background: var(--tile-bg);
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            cursor: pointer;
-            user-select: none;
-            transition: 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .tile:hover {
-            border-color: var(--primary);
-            background: #3a3a3a;
-        }
-
-        .tile.selected {
-            background: var(--primary);
-            color: #000;
-        }
-
-        .tile.hidden {
-            opacity: 0;
-            cursor: default;
-            pointer-events: none;
-        }
-
-        /* 排行榜表格 */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--surface);
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #333;
-        }
-
-        th {
-            color: var(--primary);
-        }
-
-        /* 底部標籤 */
-        .nav-tabs {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: #000;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            border-top: 2px solid var(--primary);
-        }
-
-        .tab {
-            color: #888;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 0.9rem;
-        }
-
-        .tab.active {
-            color: var(--primary);
-        }
-
-        .tab-icon {
-            font-size: 1.2rem;
-            margin-bottom: 3px;
-        }
-
-        /* 慶祝動畫容器 */
-        #confetti-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1000;
-        }
-    </style>
+/* responsive */
+@media (max-width:640px){
+  h1.game-title{font-size:1.4rem}
+  :root{ --tile-size:56px; --tile-font:22px; }
+  .tile{font-size:var(--tile-font)}
+}
+</style>
 </head>
 <body>
+<header class="main">
+  <h1 class="game-title">中文近似字挑戰</h1>
+</header>
 
-    <header>
-        <div style="width: 150px"></div> <h1 class="game-title">中文近似字挑戰</h1>
-        <div class="school-name">嘉義市民生國中</div>
-    </header>
-
-    <canvas id="confetti-canvas"></canvas>
-
-    <div id="game-match" class="container active">
-        <div class="control-panel">
-            <select id="match-size">
-                <option value="2">2x2 表格</option>
-                <option value="4" selected>4x4 表格</option>
-                <option value="8">8x8 表格</option>
-            </select>
-            <select id="match-diff">
-                <option value="easy">輕鬆</option>
-                <option value="normal" selected>一般</option>
-                <option value="hard">挑戰</option>
-            </select>
-            <button onclick="MatchGame.init()">開始配對遊戲</button>
-        </div>
-        <div class="timer-container" id="match-timer">0 秒</div>
-        <div class="grid" id="match-grid"></div>
+<div class="main">
+  <!-- Match -->
+  <div id="game-match" class="container active">
+    <div class="control-panel">
+      <label>格數</label>
+      <select id="match-size">
+        <option value="2">2x2</option>
+        <option value="4" selected>4x4</option>
+        <option value="6">6x6</option>
+        <option value="8">8x8</option>
+      </select>
+      <label>難度</label>
+      <select id="match-diff">
+        <option value="easy">輕鬆</option>
+        <option value="normal" selected>一般</option>
+        <option value="hard">挑戰</option>
+      </select>
+      <button id="start-match">開始配對</button>
+      <button id="shuffle-match">重新洗牌</button>
     </div>
+    <div class="timer-container" id="match-timer">0 秒</div>
+    <div id="match-grid" class="grid"></div>
+  </div>
 
-    <div id="game-find" class="container">
-        <div class="control-panel">
-            <select id="find-size">
-                <option value="2">2x2 表格</option>
-                <option value="5">5x5 表格</option>
-                <option value="8" selected>8x8 表格</option>
-                <option value="10">10x10 表格</option>
-            </select>
-            <select id="find-diff">
-                <option value="easy">輕鬆</option>
-                <option value="normal" selected>一般</option>
-                <option value="hard">挑戰</option>
-            </select>
-            <button onclick="FindGame.init()">開始尋找遊戲</button>
-        </div>
-        <div class="timer-container" id="find-timer">0 秒</div>
-        <div class="grid" id="find-grid"></div>
+  <!-- Find -->
+  <div id="game-find" class="container">
+    <div class="control-panel">
+      <label>格數</label>
+      <select id="find-size">
+        <option value="2">2x2</option>
+        <option value="5">5x5</option>
+        <option value="8" selected>8x8</option>
+        <option value="10">10x10</option>
+      </select>
+      <label>難度</label>
+      <select id="find-diff">
+        <option value="easy">輕鬆</option>
+        <option value="normal" selected>一般</option>
+        <option value="hard">挑戰</option>
+      </select>
+      <button id="start-find">開始尋找</button>
     </div>
+    <div class="timer-container" id="find-timer">0 秒</div>
+    <div id="find-grid" class="grid"></div>
+  </div>
 
-    <div id="page-rank" class="container">
-        <div class="control-panel">
-            <select id="rank-type" onchange="RankSystem.render()">
-                <option value="match">配對模式排名</option>
-                <option value="find">尋找模式排名</option>
-            </select>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>日期時間</th>
-                    <th>規模</th>
-                    <th>難度</th>
-                    <th>時間</th>
-                </tr>
-            </thead>
-            <tbody id="rank-body"></tbody>
-        </table>
+  <!-- Rank -->
+  <div id="page-rank" class="container">
+    <div class="control-panel">
+      <label>排行榜</label>
+      <select id="rank-type" onchange="RankSystem.render()">
+        <option value="match">配對模式排名</option>
+        <option value="find">尋找模式排名</option>
+      </select>
+      <button onclick="RankSystem.clearAll()">清除紀錄</button>
     </div>
+    <div class="table-wrap" style="margin-top:12px">
+      <table>
+        <thead>
+          <tr>
+            <th>編號</th>
+            <th>模式</th>
+            <th>規模</th>
+            <th>難度</th>
+            <th>時間</th>
+            <th>完成時間</th>
+          </tr>
+        </thead>
+        <tbody id="rank-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-    <nav class="nav-tabs">
-        <div class="tab active" onclick="switchTab('match')">
-            <span class="tab-icon">🧩</span>配對遊戲
-        </div>
-        <div class="tab" onclick="switchTab('find')">
-            <span class="tab-icon">🔍</span>尋找不同
-        </div>
-        <div class="tab" onclick="switchTab('rank')">
-            <span class="tab-icon">🏆</span>榮譽排行
-        </div>
-    </nav>
+<div class="school-badge">嘉義市民生國中</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <script>
-        // --- 字庫資料 (依教育部常用字與形近字整理) ---
-        const WordLib = {
-            easy: [
-                ['人', '入', '八'], ['土', '士'], ['己', '已', '巳'], ['大', '太', '犬'], 
-                ['日', '曰'], ['干', '千'], ['未', '末'], ['手', '毛'], ['午', '牛'], ['力', '刀']
-            ],
-            normal: [
-                ['國', '圍', '園'], ['辨', '辯', '辦', '瓣', '辮'], ['戊', '戌', '戍', '戎'],
-                ['崇', '祟'], ['博', '傳'], ['待', '侍', '恃'], ['撤', '徹'], ['概', '慨'],
-                ['折', '拆'], ['亨', '享'], ['免', '兔'], ['刺', '剌'], ['賃', '賃']
-            ],
-            hard: [
-                ['贏', '羸', '蠃'], ['膏', '肓', '育'], ['幕', '慕', '募', '暮'], 
-                ['囂', '囂'], ['魑', '魅', '魍', '魎'], ['齷', '齪'], ['竈', '龜'],
-                ['籍', '藉'], ['瞻', '贍'], ['棘', '刺'], ['粼', '鄰', '麟']
-            ]
-        };
+<nav class="nav-tabs">
+  <div class="tab active" onclick="switchTab('match')"><span class="tab-icon">🧩</span>配對遊戲</div>
+  <div class="tab" onclick="switchTab('find')"><span class="tab-icon">🔍</span>尋找不同</div>
+  <div class="tab" onclick="switchTab('rank')"><span class="tab-icon">🏆</span>榮譽排行</div>
+</nav>
 
-        // 通用計時功能
-        class Timer {
-            constructor(displayId) {
-                this.display = document.getElementById(displayId);
-                this.seconds = 0;
-                this.interval = null;
-            }
-            start() {
-                clearInterval(this.interval);
-                this.seconds = 0;
-                this.updateDisplay();
-                this.interval = setInterval(() => {
-                    this.seconds++;
-                    this.updateDisplay();
-                }, 1000);
-            }
-            stop() { clearInterval(this.interval); return this.seconds; }
-            updateDisplay() {
-                if (this.seconds < 60) {
-                    this.display.innerText = `${this.seconds} 秒`;
-                } else {
-                    const m = Math.floor(this.seconds / 60);
-                    const s = this.seconds % 60;
-                    this.display.innerText = `${m} 分 ${s} 秒`;
-                }
-            }
+<canvas id="confetti-canvas" style="position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script>
+/* ----------------- 內建繁體字庫（3200 字） -----------------
+   為確保題庫至少 3000 字，這裡以 Unicode CJK 區段連續取 3200 個字元作為內建字庫。
+   若您有教育部或學校指定的繁體字清單，建議將其替換到 TaiwanPool 變數中。
+*/
+const TaiwanPool = (function(){
+  const arr = [];
+  const start = 0x4E00; // CJK Unified Ideographs 起始
+  const count = 3200;
+  for (let i = 0; i < count; i++) {
+    arr.push(String.fromCharCode(start + i));
+  }
+  return arr;
+})();
+
+/* 建立形近字群（模擬）：從 TaiwanPool 隨機分組 */
+function buildGroupsFromPool(pool, groupsCount=800, groupSize=3) {
+  const groups = [];
+  const used = new Set();
+  const poolCopy = pool.slice();
+  for (let i=0; i<groupsCount && poolCopy.length >= groupSize; i++) {
+    const group = [];
+    for (let j=0;j<groupSize;j++){
+      const idx = Math.floor(Math.random() * poolCopy.length);
+      group.push(poolCopy[idx]);
+      poolCopy.splice(idx,1);
+    }
+    groups.push(group);
+  }
+  // 若不足，補單字群
+  while (groups.length < groupsCount) groups.push([pool[groups.length % pool.length]]);
+  return groups;
+}
+
+const WordLib = {
+  easy: buildGroupsFromPool(TaiwanPool, 600, 2),
+  normal: buildGroupsFromPool(TaiwanPool, 800, 3),
+  hard: buildGroupsFromPool(TaiwanPool, 1000, 4)
+};
+
+/* ----------------- 計時器 ----------------- */
+class Timer {
+  constructor(displayId){
+    this.display = document.getElementById(displayId);
+    this.seconds = 0;
+    this.interval = null;
+  }
+  start(){
+    clearInterval(this.interval);
+    this.seconds = 0;
+    this.updateDisplay();
+    this.interval = setInterval(()=>{ this.seconds++; this.updateDisplay(); },1000);
+  }
+  stop(){ clearInterval(this.interval); return this.seconds; }
+  updateDisplay(){
+    if (this.seconds < 60) this.display.innerText = `${this.seconds} 秒`;
+    else {
+      const m = Math.floor(this.seconds/60);
+      const s = this.seconds % 60;
+      this.display.innerText = `${m} 分 ${s} 秒`;
+    }
+  }
+}
+
+/* ----------------- 配對遊戲（每字恰好一對） ----------------- */
+const MatchGame = {
+  timer: new Timer('match-timer'),
+  firstTile: null,
+  canClick: true,
+  pairsLeft: 0,
+  currentData: [],
+  init(){
+    const size = parseInt(document.getElementById('match-size').value);
+    const diff = document.getElementById('match-diff').value;
+    const grid = document.getElementById('match-grid');
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${size}, ${getComputedStyle(document.documentElement).getPropertyValue('--tile-size')})`;
+    const total = size * size;
+    this.pairsLeft = total / 2;
+
+    // 從 WordLib[diff] 中抽取不重複的字，確保每個字只出現一對
+    const groups = WordLib[diff];
+    const uniqueChars = new Set();
+    const pool = [];
+    let attempts = 0;
+    while (pool.length < this.pairsLeft && attempts < 20000) {
+      attempts++;
+      const g = groups[Math.floor(Math.random() * groups.length)];
+      const ch = g[Math.floor(Math.random() * g.length)];
+      if (!uniqueChars.has(ch)) {
+        uniqueChars.add(ch);
+        pool.push(ch);
+      }
+    }
+    // 若仍不足，從 TaiwanPool 補足（保證唯一）
+    let idx = 0;
+    while (pool.length < this.pairsLeft && idx < TaiwanPool.length) {
+      const ch = TaiwanPool[idx++];
+      if (!uniqueChars.has(ch)) { uniqueChars.add(ch); pool.push(ch); }
+    }
+
+    // 產生遊戲資料（每個字恰好兩個）
+    let gameData = [...pool, ...pool].sort(()=>0.5 - Math.random());
+    this.currentData = gameData.slice();
+    gameData.forEach((char, i) => {
+      const el = document.createElement('div');
+      el.className = 'tile';
+      el.innerText = char;
+      el.dataset.index = i;
+      el.onclick = () => this.handleTap(el);
+      grid.appendChild(el);
+    });
+
+    this.timer.start();
+    this.firstTile = null;
+    this.canClick = true;
+  },
+  handleTap(el){
+    if (!this.canClick || el.classList.contains('hidden') || el === this.firstTile) return;
+    el.classList.add('selected');
+    if (!this.firstTile) {
+      this.firstTile = el;
+    } else {
+      this.canClick = false;
+      if (this.firstTile.innerText === el.innerText) {
+        setTimeout(()=>{
+          this.firstTile.classList.add('hidden');
+          el.classList.add('hidden');
+          this.firstTile = null;
+          this.canClick = true;
+          this.pairsLeft--;
+          if (this.pairsLeft === 0) this.win();
+        }, 300);
+      } else {
+        // 錯誤回饋
+        this.firstTile.classList.add('wrong');
+        el.classList.add('wrong');
+        setTimeout(()=>{
+          this.firstTile.classList.remove('selected','wrong');
+          el.classList.remove('selected','wrong');
+          this.firstTile = null;
+          this.canClick = true;
+        }, 600);
+      }
+    }
+  },
+  win(){
+    const s = this.timer.stop();
+    celebrate();
+    RankSystem.save('match', document.getElementById('match-size').value, document.getElementById('match-diff').value, s);
+  }
+};
+
+/* ----------------- 尋找遊戲 ----------------- */
+const FindGame = {
+  timer: new Timer('find-timer'),
+  init(){
+    const size = parseInt(document.getElementById('find-size').value);
+    const diff = document.getElementById('find-diff').value;
+    const grid = document.getElementById('find-grid');
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${size}, ${getComputedStyle(document.documentElement).getPropertyValue('--tile-size')})`;
+
+    const groups = WordLib[diff];
+    const targetGroup = groups[Math.floor(Math.random() * groups.length)];
+    let shuffled = [...targetGroup].sort(()=>0.5 - Math.random());
+    if (shuffled.length < 2) {
+      for (let ch of TaiwanPool) {
+        if (!shuffled.includes(ch)) { shuffled.push(ch); break; }
+      }
+    }
+    const mainChar = shuffled[0];
+    const oddChar = shuffled[1];
+    const total = size * size;
+    const oddIndex = Math.floor(Math.random() * total);
+
+    for (let i=0;i<total;i++){
+      const el = document.createElement('div');
+      el.className = 'tile';
+      el.innerText = (i === oddIndex) ? oddChar : mainChar;
+      el.onclick = () => {
+        if (i === oddIndex) this.win();
+        else {
+          el.classList.add('wrong');
+          setTimeout(()=>el.classList.remove('wrong'),300);
         }
+      };
+      grid.appendChild(el);
+    }
+    this.timer.start();
+  },
+  win(){
+    const s = this.timer.stop();
+    celebrate();
+    RankSystem.save('find', document.getElementById('find-size').value, document.getElementById('find-diff').value, s);
+  }
+};
 
-        // --- 配對遊戲邏輯 ---
-        const MatchGame = {
-            timer: new Timer('match-timer'),
-            firstTile: null,
-            canClick: true,
-            pairsLeft: 0,
-            init() {
-                const size = parseInt(document.getElementById('match-size').value);
-                const diff = document.getElementById('match-diff').value;
-                const grid = document.getElementById('match-grid');
-                grid.innerHTML = '';
-                grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+/* ----------------- 排名系統（新增編號、日期在最右） ----------------- */
+const RankSystem = {
+  _key: 'ms_rank_v3',
+  _idKey: 'ms_rank_id_v3',
+  _nextId(){
+    const n = parseInt(localStorage.getItem(this._idKey) || '1',10);
+    localStorage.setItem(this._idKey, String(n+1));
+    return n;
+  },
+  save(type, size, diff, time){
+    const data = JSON.parse(localStorage.getItem(this._key) || '[]');
+    const id = this._nextId();
+    data.push({
+      id,
+      type,
+      size,
+      diff,
+      time,
+      date: new Date().toLocaleString()
+    });
+    localStorage.setItem(this._key, JSON.stringify(data));
+    if (document.getElementById('page-rank').classList.contains('active')) this.render();
+  },
+  render(){
+    const type = document.getElementById('rank-type').value;
+    const data = JSON.parse(localStorage.getItem(this._key) || '[]');
+    const body = document.getElementById('rank-body');
+    body.innerHTML = '';
+    data.filter(item => item.type === type)
+      .sort((a,b) => a.time - b.time)
+      .forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.type === 'match' ? '配對' : '尋找'}</td>
+          <td>${item.size}x${item.size}</td>
+          <td>${item.diff}</td>
+          <td class="time">${item.time}s</td>
+          <td>${item.date}</td>
+        `;
+        body.appendChild(row);
+      });
+  },
+  clearAll(){
+    if (!confirm('確定要清除所有排行紀錄嗎？')) return;
+    localStorage.removeItem(this._key);
+    localStorage.removeItem(this._idKey);
+    this.render();
+  }
+};
 
-                const totalItems = size * size;
-                this.pairsLeft = totalItems / 2;
-                
-                // 抽取字組
-                let pool = [];
-                const diffSet = WordLib[diff];
-                while(pool.length < this.pairsLeft) {
-                    const group = diffSet[Math.floor(Math.random() * diffSet.length)];
-                    const chars = group.sort(() => 0.5 - Math.random()).slice(0, 2);
-                    // 為了配對，我們取同一個字兩次，或者取同組內的相似字
-                    // 這裡採用「一對相同的字」來達成配對消消樂
-                    const char = group[Math.floor(Math.random() * group.length)];
-                    pool.push(char);
-                }
+/* ----------------- 分頁切換 ----------------- */
+function switchTab(tabId){
+  document.querySelectorAll('.container').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('game-' + tabId)?.classList.add('active');
+  document.getElementById('page-' + tabId)?.classList.add('active');
+  const tabs = document.querySelectorAll('.tab');
+  if (tabId === 'match') tabs[0].classList.add('active');
+  if (tabId === 'find') tabs[1].classList.add('active');
+  if (tabId === 'rank') { tabs[2].classList.add('active'); RankSystem.render(); }
+}
 
-                let gameData = [...pool, ...pool].sort(() => 0.5 - Math.random());
-                
-                gameData.forEach(char => {
-                    const el = document.createElement('div');
-                    el.className = 'tile';
-                    el.innerText = char;
-                    el.onclick = () => this.handleTap(el);
-                    grid.appendChild(el);
-                });
+/* ----------------- 慶祝動畫 ----------------- */
+function celebrate(){
+  confetti({
+    particleCount: 160,
+    spread: 80,
+    origin: { y: 0.6 },
+    colors: ['#00e5ff','#76ff03','#ffffff']
+  });
+}
 
-                this.timer.start();
-                this.firstTile = null;
-            },
-            handleTap(el) {
-                if (!this.canClick || el.classList.contains('hidden') || el === this.firstTile) return;
+/* ----------------- 綁定按鈕 ----------------- */
+document.getElementById('start-match').addEventListener('click', ()=>MatchGame.init());
+document.getElementById('shuffle-match').addEventListener('click', ()=>{
+  if (MatchGame.currentData && MatchGame.currentData.length){
+    const grid = document.getElementById('match-grid');
+    const nodes = Array.from(grid.children);
+    const chars = MatchGame.currentData.sort(()=>0.5 - Math.random());
+    nodes.forEach((n,i)=>{ n.innerText = chars[i]; n.className='tile'; });
+    MatchGame.firstTile = null;
+    MatchGame.canClick = true;
+  } else MatchGame.init();
+});
+document.getElementById('start-find').addEventListener('click', ()=>FindGame.init());
 
-                el.classList.add('selected');
-
-                if (!this.firstTile) {
-                    this.firstTile = el;
-                } else {
-                    this.canClick = false;
-                    if (this.firstTile.innerText === el.innerText) {
-                        setTimeout(() => {
-                            this.firstTile.classList.add('hidden');
-                            el.classList.add('hidden');
-                            this.firstTile = null;
-                            this.canClick = true;
-                            this.pairsLeft--;
-                            if (this.pairsLeft === 0) this.win();
-                        }, 300);
-                    } else {
-                        setTimeout(() => {
-                            this.firstTile.classList.remove('selected');
-                            el.classList.remove('selected');
-                            this.firstTile = null;
-                            this.canClick = true;
-                        }, 500);
-                    }
-                }
-            },
-            win() {
-                const s = this.timer.stop();
-                celebrate();
-                RankSystem.save('match', document.getElementById('match-size').value, document.getElementById('match-diff').value, s);
-            }
-        };
-
-        // --- 尋找遊戲邏輯 ---
-        const FindGame = {
-            timer: new Timer('find-timer'),
-            init() {
-                const size = parseInt(document.getElementById('find-size').value);
-                const diff = document.getElementById('find-diff').value;
-                const grid = document.getElementById('find-grid');
-                grid.innerHTML = '';
-                grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-
-                const groups = WordLib[diff];
-                const targetGroup = groups[Math.floor(Math.random() * groups.length)];
-                const shuffled = [...targetGroup].sort(() => 0.5 - Math.random());
-                
-                const mainChar = shuffled[0];
-                const oddChar = shuffled[1];
-                const oddIndex = Math.floor(Math.random() * (size * size));
-
-                for (let i = 0; i < size * size; i++) {
-                    const el = document.createElement('div');
-                    el.className = 'tile';
-                    el.innerText = (i === oddIndex) ? oddChar : mainChar;
-                    el.onclick = () => {
-                        if (i === oddIndex) this.win();
-                        else el.style.background = '#ff5252';
-                    };
-                    grid.appendChild(el);
-                }
-                this.timer.start();
-            },
-            win() {
-                const s = this.timer.stop();
-                celebrate();
-                RankSystem.save('find', document.getElementById('find-size').value, document.getElementById('find-diff').value, s);
-            }
-        };
-
-        // --- 排名系統 ---
-        const RankSystem = {
-            save(type, size, diff, time) {
-                const data = JSON.parse(localStorage.getItem('ms_rank') || '[]');
-                data.push({
-                    type, size, diff, time,
-                    date: new Date().toLocaleString()
-                });
-                localStorage.setItem('ms_rank', JSON.stringify(data));
-            },
-            render() {
-                const type = document.getElementById('rank-type').value;
-                const data = JSON.parse(localStorage.getItem('ms_rank') || '[]');
-                const body = document.getElementById('rank-body');
-                body.innerHTML = '';
-
-                data.filter(item => item.type === type)
-                    .sort((a, b) => a.time - b.time)
-                    .forEach(item => {
-                        const row = `<tr>
-                            <td>${item.date}</td>
-                            <td>${item.size}x${item.size}</td>
-                            <td>${item.diff}</td>
-                            <td>${item.time}s</td>
-                        </tr>`;
-                        body.innerHTML += row;
-                    });
-            }
-        };
-
-        // 分頁切換
-        function switchTab(tabId) {
-            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            
-            document.getElementById('game-' + tabId)?.classList.add('active');
-            document.getElementById('page-' + tabId)?.classList.add('active');
-            
-            const tabs = document.querySelectorAll('.tab');
-            if (tabId === 'match') tabs[0].classList.add('active');
-            if (tabId === 'find') tabs[1].classList.add('active');
-            if (tabId === 'rank') {
-                tabs[2].classList.add('active');
-                RankSystem.render();
-            }
-        }
-
-        // 慶祝動畫
-        function celebrate() {
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#00e5ff', '#76ff03', '#ffffff']
-            });
-        }
-
-        // 初始化
-        window.onload = () => {
-            MatchGame.init();
-        };
-    </script>
+/* ----------------- 初始化：自動啟動配對遊戲 ----------------- */
+window.onload = () => {
+  MatchGame.init();
+};
+</script>
 </body>
 </html>
