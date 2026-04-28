@@ -9,144 +9,159 @@
         :root {
             --bg-dark: #0f172a;
             --card-bg: #1e293b;
-            --primary-glow: #38bdf8;
-            --secondary-glow: #fbbf24;
-            --accent-green: #4ade80;
-            --text-main: #f1f5f9;
-            --text-dim: #94a3b8;
+            --primary-cyan: #22d3ee;
+            --accent-gold: #fbbf24;
+            --text-light: #f1f5f9;
+            --wrong-red: #ef4444;
+            --correct-green: #10b981;
         }
-
-        * { box-sizing: border-box; transition: all 0.2s ease; }
 
         body {
             background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            color: var(--text-light);
+            font-family: "Noto Sans TC", "微軟正黑體", sans-serif;
             margin: 0;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* 標題設計 */
-        header {
+        /* 頂部標題 */
+        .header {
             padding: 20px;
             text-align: center;
-            background: linear-gradient(180deg, #1e293b 0%, transparent 100%);
             width: 100%;
+            background: linear-gradient(to bottom, #1e293b, transparent);
         }
 
         h1 {
             margin: 0;
-            font-size: 1.5rem;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px var(--primary-glow);
-            color: var(--primary-glow);
+            font-size: 1.8rem;
+            letter-spacing: 4px;
+            color: var(--primary-cyan);
+            text-shadow: 0 0 15px rgba(34, 211, 238, 0.5);
         }
 
-        /* 控制區 */
-        .controls {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
+        /* 導覽列 */
+        .tabs {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #1e293b;
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin: 15px;
+            border-top: 1px solid #334155;
+            z-index: 100;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            color: #94a3b8;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary-cyan);
+            background: rgba(34, 211, 238, 0.1);
+            border-top: 3px solid var(--primary-cyan);
+        }
+
+        /* 內容容器 */
+        .container {
+            width: 95%;
+            max-width: 600px;
+            padding: 20px;
+            margin-bottom: 80px;
+        }
+
+        .page { display: none; }
+        .page.active { display: flex; flex-direction: column; align-items: center; }
+
+        /* 控制區 */
+        .control-panel {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
             border: 1px solid #334155;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .setting-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 10px;
         }
 
         select, button {
             background: #0f172a;
             color: white;
             border: 1px solid #334155;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            flex: 1;
+            font-size: 0.9rem;
         }
 
-        button.start-btn {
-            background: var(--primary-glow);
-            color: #0f172a;
+        .btn-start {
+            background: var(--primary-cyan);
+            color: var(--bg-dark);
             font-weight: bold;
             border: none;
             cursor: pointer;
-            padding: 8px 20px;
+            transition: transform 0.2s;
         }
 
-        button.start-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px var(--primary-glow);
-        }
+        .btn-start:hover { transform: scale(1.05); }
 
         /* 計時器 */
         .timer-box {
-            font-size: 1.2rem;
-            font-family: 'Courier New', monospace;
-            color: var(--secondary-glow);
-            margin-bottom: 10px;
-            background: #000;
-            padding: 5px 15px;
-            border-radius: 20px;
-            border: 1px solid var(--secondary-glow);
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            font-family: monospace;
+            margin: 10px 0;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
         }
 
         /* 遊戲網格 */
-        #game-container {
-            flex-grow: 1;
-            width: 95%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 80px;
-        }
-
-        #grid {
+        .grid {
             display: grid;
-            gap: 8px;
-            background: #334155;
-            padding: 8px;
-            border-radius: 8px;
+            gap: 6px;
             width: 100%;
-            aspect-ratio: 1 / 1;
+            aspect-ratio: 1/1;
+            margin-top: 10px;
         }
 
         .tile {
-            background: var(--card-bg);
+            background: #334155;
             border-radius: 4px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-weight: bold;
             cursor: pointer;
+            transition: all 0.2s;
             user-select: none;
-            border: 1px solid #475569;
+            color: var(--text-light);
         }
 
-        .tile:hover {
-            background: #334155;
-            border-color: var(--primary-glow);
+        /* 相似字樣式優化 */
+        .tile-text {
+            pointer-events: none;
         }
 
-        .tile.selected {
-            background: var(--primary-glow);
-            color: #000;
-        }
-
-        .tile.correct {
-            animation: pulse 0.3s;
-            visibility: hidden;
-        }
-
-        .tile.wrong {
-            background: #ef4444;
-            animation: shake 0.3s;
-        }
+        .tile:hover { background: #475569; }
+        .tile.selected { background: var(--primary-cyan); color: var(--bg-dark); }
+        .tile.cleared { visibility: hidden; }
+        .tile.wrong { background: var(--wrong-red); animation: shake 0.3s; }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
@@ -154,350 +169,313 @@
             75% { transform: translateX(5px); }
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.5; }
-            100% { transform: scale(0); opacity: 0; }
-        }
-
-        /* 分頁欄 */
-        .tab-bar {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 65px;
-            background: #1e293b;
-            display: flex;
-            border-top: 1px solid #334155;
-        }
-
-        .tab {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: var(--text-dim);
-            cursor: pointer;
-        }
-
-        .tab.active {
-            color: var(--primary-glow);
-            background: rgba(56, 189, 248, 0.1);
-        }
-
-        .tab-icon { font-size: 20px; margin-bottom: 4px; }
-
-        /* 排行榜頁面 */
-        .page { display: none; width: 100%; padding: 20px; max-width: 800px; }
-        .page.active { display: block; }
-
+        /* 排名表格 */
+        .rank-container { width: 100%; overflow-x: auto; }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
             background: var(--card-bg);
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
         }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; font-size: 0.85rem; }
+        th { background: #334155; color: var(--primary-cyan); }
 
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #334155;
-        }
-
-        th { background: #0f172a; color: var(--primary-glow); }
-
+        /* 響應式字體 */
+        .size-2 { font-size: 60px; }
+        .size-4 { font-size: 30px; }
+        .size-5 { font-size: 24px; }
+        .size-8 { font-size: 16px; }
+        .size-10 { font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1 id="page-title">相似字配對挑戰</h1>
-    </header>
+    <div class="header">
+        <h1>GHOST CHARACTERS</h1>
+    </div>
 
-    <div id="game-page" class="page active">
-        <div class="controls">
-            <select id="grid-size">
-                <option value="2">2x2 表格</option>
-                <option value="4" selected>4x4 表格</option>
-                <option value="6">6x6 表格</option>
-                <option value="8">8x8 表格</option>
-            </select>
-            <select id="diff">
-                <option value="easy">輕鬆</option>
-                <option value="normal" selected>一般</option>
-                <option value="hard">挑戰</option>
-            </select>
-            <button class="start-btn" onclick="initMatching()">開始遊戲</button>
+    <div class="container">
+        <div id="page-match" class="page active">
+            <div class="control-panel">
+                <div class="setting-group">
+                    <select id="match-size">
+                        <option value="2">2x2</option>
+                        <option value="4" selected>4x4</option>
+                        <option value="8">8x8</option>
+                    </select>
+                    <select id="match-diff">
+                        <option value="easy">輕鬆</option>
+                        <option value="normal" selected>一般</option>
+                        <option value="hard">挑戰</option>
+                    </select>
+                </div>
+                <button class="btn-start" onclick="initMatchGame()">開始配對挑戰</button>
+            </div>
+            <div class="timer-box" id="match-timer">0 秒</div>
+            <div id="match-grid" class="grid"></div>
         </div>
-        <center><div class="timer-box" id="timer">準備就緒</div></center>
-        <div id="game-container">
-            <div id="grid"></div>
+
+        <div id="page-find" class="page">
+            <div class="control-panel">
+                <div class="setting-group">
+                    <select id="find-size">
+                        <option value="2">2x2</option>
+                        <option value="5" selected>5x5</option>
+                        <option value="8">8x8</option>
+                        <option value="10">10x10</option>
+                    </select>
+                    <select id="find-diff">
+                        <option value="easy">輕鬆</option>
+                        <option value="normal" selected>一般</option>
+                        <option value="hard">挑戰</option>
+                    </select>
+                </div>
+                <button class="btn-start" onclick="initFindGame()">開始尋找不同</button>
+            </div>
+            <div class="timer-box" id="find-timer">0 秒</div>
+            <div id="find-grid" class="grid"></div>
+        </div>
+
+        <div id="page-rank" class="page">
+            <div class="control-panel">
+                <select id="rank-type-filter" onchange="showRank()">
+                    <option value="match">配對挑戰</option>
+                    <option value="find">尋找不同</option>
+                </select>
+            </div>
+            <div class="rank-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>格數</th>
+                            <th>難度</th>
+                            <th>時間</th>
+                            <th>日期</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rank-list"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div id="search-page" class="page">
-        <div class="controls">
-            <select id="search-size">
-                <option value="2">2x2</option>
-                <option value="5">5x5</option>
-                <option value="8">8x8</option>
-                <option value="10">10x10</option>
-            </select>
-            <select id="search-diff">
-                <option value="easy">輕鬆</option>
-                <option value="normal" selected>一般</option>
-                <option value="hard">挑戰</option>
-            </select>
-            <button class="start-btn" onclick="initSearch()">開始挑戰</button>
-        </div>
-        <center><div class="timer-box" id="search-timer">準備就緒</div></center>
-        <div id="search-container" style="width:100%; display: flex; justify-content: center;">
-            <div id="search-grid" style="display: grid; gap: 5px; background: #334155; padding: 8px; border-radius: 8px; width: 100%; aspect-ratio: 1/1;"></div>
-        </div>
-    </div>
-
-    <div id="rank-page" class="page">
-        <div class="controls">
-            <select id="rank-type" onchange="showRank()">
-                <option value="match">配對模式</option>
-                <option value="search">尋找模式</option>
-            </select>
-        </div>
-        <table id="rank-table">
-            <thead>
-                <tr>
-                    <th>名次</th>
-                    <th>規模/難度</th>
-                    <th>時間</th>
-                    <th>日期</th>
-                </tr>
-            </thead>
-            <tbody id="rank-body"></tbody>
-        </table>
-    </div>
-
-    <div class="tab-bar">
-        <div class="tab active" onclick="switchTab('game')">
-            <span class="tab-icon">🧩</span><span>配對</span>
-        </div>
-        <div class="tab" onclick="switchTab('search')">
-            <span class="tab-icon">🔍</span><span>尋找</span>
-        </div>
-        <div class="tab" onclick="switchTab('rank')">
-            <span class="tab-icon">🏆</span><span>排名</span>
-        </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('match')">🧩 配對</div>
+        <div class="tab" onclick="switchTab('find')">🔍 尋找</div>
+        <div class="tab" onclick="switchTab('rank')">🏆 排名</div>
     </div>
 
     <script>
-        // --- 題庫豐富化 ---
-        const similarityPool = {
+        // --- 豐富題庫設計 ---
+        const DB = {
             easy: [
-                ['大', '太', '犬'], ['日', '曰', '目'], ['己', '已', '巳'], ['人', '入', '八'],
-                ['土', '士'], ['干', '千', '于'], ['口', '回'], ['由', '甲', '申']
+                ['大', '太', '犬'], ['日', '曰', '目'], ['己', '已', '巳'], ['土', '士'], 
+                ['干', '千', '于'], ['王', '玉', '主'], ['木', '本', '末', '未'], ['人', '入', '八']
             ],
             normal: [
-                ['國', '圍', '圖', '圈'], ['戊', '戌', '戍', '戎', '戒'], ['買', '賣'], ['免', '兔'],
-                ['侍', '恃', '待', '持'], ['拆', '折', '析'], ['汩', '汨'], ['梁', '粱'],
-                ['幕', '慕', '墓', '暮'], ['崇', '祟'], ['廷', '延']
+                ['國', '圍', '園', '圈'], ['待', '侍', '恃', '特', '持'], ['戊', '戌', '戍', '戎'],
+                ['買', '賣', '賈'], ['盲', '肓', '育'], ['析', '折', '拆'], ['亨', '享', '烹'],
+                ['毫', '毫', '毛'], ['卷', '券'], ['崇', '嵩'], ['渴', '喝', '揭']
             ],
             hard: [
-                ['辨', '辯', '辦', '瓣', '辮'], ['贏', '羸', '蠃', '贏'], ['璧', '壁', '劈', '霹'],
-                ['膏', '肓', '育'], ['冀', '翼'], ['黌', '黽'], ['魑', '魅', '魍', '魎'],
-                ['贏', '蠃'], ['鬱', '籲'], ['髒', '臟']
+                ['贏', '羸', '蠃', '嬴', '臝'], ['辨', '辯', '辦', '瓣', '辮'], ['齷', '齪', '齲', '齏'],
+                ['璧', '壁', '劈', '避'], ['憂', '優', '擾'], ['纂', '篡', '算'], ['馨', '聲', '罄'],
+                ['龐', '寵', '龍'], ['囂', '囂', '器'], ['鬱', '鬰'], ['邋', '遢']
             ]
         };
 
-        let timerInt;
-        let startTime;
-        let currentMode = 'match';
+        let timerInterval;
+        let seconds = 0;
+        let isRunning = false;
+        let matchSelected = null;
+        let gameType = 'match'; // match or find
 
-        function switchTab(tab) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        // --- 通用功能 ---
+        function switchTab(type) {
+            gameType = type;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            clearInterval(timerInt);
-            
-            if(tab === 'game') {
-                document.getElementById('game-page').classList.add('active');
-                document.querySelectorAll('.tab')[0].classList.add('active');
-                document.getElementById('page-title').innerText = "相似字配對挑戰";
-            } else if(tab === 'search') {
-                document.getElementById('search-page').classList.add('active');
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                document.getElementById('page-title').innerText = "找出不一樣的字";
-            } else {
-                document.getElementById('rank-page').classList.add('active');
-                document.querySelectorAll('.tab')[2].classList.add('active');
-                document.getElementById('page-title').innerText = "榮譽排行榜";
-                showRank();
-            }
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`page-${type}`).classList.add('active');
+            if(type === 'rank') showRank();
+            stopTimer();
         }
 
-        function formatTime(ms) {
-            let s = Math.floor(ms / 1000);
-            if (s < 60) return `${s} 秒`;
-            return `${Math.floor(s/60)} 分 ${s%60} 秒`;
+        function stopTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
         }
 
         function startTimer(displayId) {
-            startTime = Date.now();
-            timerInt = setInterval(() => {
-                let diff = Date.now() - startTime;
-                document.getElementById(displayId).innerText = formatTime(diff);
-            }, 100);
-        }
-
-        // --- 配對模式邏輯 ---
-        let firstTile = null;
-        let pairsLeft = 0;
-
-        function initMatching() {
-            const size = parseInt(document.getElementById('grid-size').value);
-            const diff = document.getElementById('diff').value;
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-            
-            let total = size * size;
-            pairsLeft = total / 2;
-            let chars = [];
-            
-            let sets = [...similarityPool[diff]];
-            for(let i=0; i<pairsLeft; i++) {
-                let set = sets[Math.floor(Math.random() * sets.length)];
-                let char = set[Math.floor(Math.random() * set.length)];
-                chars.push(char, char);
-            }
-            chars.sort(() => Math.random() - 0.5);
-
-            chars.forEach(c => {
-                const div = document.createElement('div');
-                div.className = 'tile';
-                div.innerText = c;
-                div.onclick = () => handleMatch(div);
-                grid.appendChild(div);
-            });
-            
-            startTimer('timer');
-        }
-
-        function handleMatch(tile) {
-            if(tile.classList.contains('correct') || tile === firstTile) return;
-            tile.classList.add('selected');
-
-            if(!firstTile) {
-                firstTile = tile;
-            } else {
-                if(firstTile.innerText === tile.innerText) {
-                    let a = firstTile, b = tile;
-                    setTimeout(() => {
-                        a.classList.add('correct');
-                        b.classList.add('correct');
-                    }, 200);
-                    pairsLeft--;
-                    if(pairsLeft === 0) win('match');
+            stopTimer();
+            seconds = 0;
+            isRunning = true;
+            const display = document.getElementById(displayId);
+            timerInterval = setInterval(() => {
+                seconds++;
+                if (seconds < 60) {
+                    display.innerText = `${seconds} 秒`;
                 } else {
-                    let a = firstTile, b = tile;
-                    setTimeout(() => {
-                        a.classList.remove('selected');
-                        b.classList.remove('selected');
-                        b.classList.add('wrong');
-                        setTimeout(() => b.classList.remove('wrong'), 300);
-                    }, 400);
+                    display.innerText = `${Math.floor(seconds / 60)} 分 ${seconds % 60} 秒`;
                 }
-                firstTile = null;
-            }
+            }, 1000);
         }
 
-        // --- 尋找模式邏輯 ---
-        function initSearch() {
-            const size = parseInt(document.getElementById('search-size').value);
-            const diff = document.getElementById('search-diff').value;
-            const grid = document.getElementById('search-grid');
-            grid.innerHTML = '';
-            grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-            
-            let sets = [...similarityPool[diff]];
-            let targetSet = sets[Math.floor(Math.random()*sets.length)];
-            
-            // 挑選兩個不一樣但相似的字
-            let mainChar, diffChar;
-            if(targetSet.length >= 2) {
-                let temp = [...targetSet].sort(() => Math.random() - 0.5);
-                mainChar = temp[0];
-                diffChar = temp[1];
-            } else {
-                mainChar = targetSet[0];
-                diffChar = '？'; 
-            }
-
-            let diffIndex = Math.floor(Math.random() * (size * size));
-
-            for(let i=0; i < size*size; i++) {
-                const div = document.createElement('div');
-                div.className = 'tile';
-                div.style.fontSize = size > 8 ? '16px' : '24px';
-                div.innerText = (i === diffIndex) ? diffChar : mainChar;
-                div.onclick = () => {
-                    if(i === diffIndex) {
-                        div.style.background = 'var(--accent-green)';
-                        win('search');
-                    } else {
-                        div.classList.add('wrong');
-                        setTimeout(() => div.classList.remove('wrong'), 300);
-                    }
-                };
-                grid.appendChild(div);
-            }
-            startTimer('search-timer');
-        }
-
-        function win(type) {
-            clearInterval(timerInt);
-            let duration = Date.now() - startTime;
-            
-            // 慶祝動畫
+        function celebrate() {
             confetti({
                 particleCount: 150,
                 spread: 70,
                 origin: { y: 0.6 },
-                colors: ['#38bdf8', '#fbbf24', '#4ade80']
+                colors: ['#22d3ee', '#fbbf24', '#f1f5f9']
             });
+        }
 
-            // 儲存紀錄
-            let size = type === 'match' ? document.getElementById('grid-size').value : document.getElementById('search-size').value;
-            let diff = type === 'match' ? document.getElementById('diff').value : document.getElementById('search-diff').value;
+        // --- 配對遊戲邏輯 ---
+        function initMatchGame() {
+            const size = parseInt(document.getElementById('match-size').value);
+            const diff = document.getElementById('match-diff').value;
+            const grid = document.getElementById('match-grid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
             
-            let records = JSON.parse(localStorage.getItem('game_ranks') || '[]');
+            startTimer('match-timer');
+            
+            const totalPairs = (size * size) / 2;
+            let selectedChars = [];
+            
+            // 從豐富字庫隨機抓取
+            let pool = [];
+            DB[diff].forEach(group => pool.push(...group));
+            pool = Array.from(new Set(pool)).sort(() => Math.random() - 0.5);
+            
+            for(let i=0; i<totalPairs; i++) {
+                const char = pool[i % pool.length];
+                selectedChars.push(char, char);
+            }
+            selectedChars.sort(() => Math.random() - 0.5);
+
+            selectedChars.forEach(char => {
+                const tile = document.createElement('div');
+                tile.className = `tile size-${size}`;
+                tile.innerText = char;
+                tile.onclick = () => handleMatchClick(tile);
+                grid.appendChild(tile);
+            });
+        }
+
+        function handleMatchClick(tile) {
+            if(!isRunning || tile.classList.contains('cleared')) return;
+
+            if(!matchSelected) {
+                matchSelected = tile;
+                tile.classList.add('selected');
+            } else if(matchSelected === tile) {
+                tile.classList.remove('selected');
+                matchSelected = null;
+            } else {
+                if(matchSelected.innerText === tile.innerText) {
+                    tile.classList.add('selected');
+                    setTimeout(() => {
+                        tile.classList.replace('selected', 'cleared');
+                        matchSelected.classList.replace('selected', 'cleared');
+                        matchSelected = null;
+                        checkWin('match');
+                    }, 200);
+                } else {
+                    tile.classList.add('wrong');
+                    matchSelected.classList.add('wrong');
+                    const temp = matchSelected;
+                    setTimeout(() => {
+                        tile.classList.remove('wrong', 'selected');
+                        temp.classList.remove('wrong', 'selected');
+                    }, 400);
+                    matchSelected = null;
+                }
+            }
+        }
+
+        // --- 尋找遊戲邏輯 ---
+        function initFindGame() {
+            const size = parseInt(document.getElementById('find-size').value);
+            const diff = document.getElementById('find-diff').value;
+            const grid = document.getElementById('find-grid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+            
+            startTimer('find-timer');
+
+            // 從題庫挑選一組相似字
+            const groups = DB[diff];
+            const randomGroup = groups[Math.floor(Math.random() * groups.length)];
+            const sub = [...randomGroup].sort(() => Math.random() - 0.5);
+            const mainChar = sub[0];
+            const targetChar = sub[1];
+
+            const total = size * size;
+            const targetIdx = Math.floor(Math.random() * total);
+
+            for(let i=0; i<total; i++) {
+                const tile = document.createElement('div');
+                tile.className = `tile size-${size}`;
+                tile.innerText = (i === targetIdx) ? targetChar : mainChar;
+                tile.onclick = () => {
+                    if(i === targetIdx) {
+                        tile.style.background = 'var(--correct-green)';
+                        saveRecord('find', size, diff, seconds);
+                        celebrate();
+                        stopTimer();
+                    } else {
+                        tile.classList.add('wrong');
+                        setTimeout(() => tile.classList.remove('wrong'), 400);
+                    }
+                };
+                grid.appendChild(tile);
+            }
+        }
+
+        function checkWin(type) {
+            const cleared = document.querySelectorAll('.cleared').length;
+            const size = parseInt(document.getElementById('match-size').value);
+            if(cleared === size * size) {
+                const diff = document.getElementById('match-diff').value;
+                saveRecord('match', size, diff, seconds);
+                celebrate();
+                stopTimer();
+            }
+        }
+
+        // --- 排名功能 ---
+        function saveRecord(type, size, diff, sec) {
+            const records = JSON.parse(localStorage.getItem('game_ranks') || '[]');
+            const now = new Date();
             records.push({
-                type,
-                info: `${size}x${size} (${diff})`,
-                time: duration,
-                date: new Date().toLocaleString()
+                type, size, 
+                diff: (diff==='easy'?'輕鬆':diff==='normal'?'一般':'挑戰'),
+                sec,
+                date: `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes()}`
             });
             localStorage.setItem('game_ranks', JSON.stringify(records));
-
-            setTimeout(() => alert(`挑戰成功！花費時間：${formatTime(duration)}`), 500);
         }
 
         function showRank() {
-            let type = document.getElementById('rank-type').value;
-            let records = JSON.parse(localStorage.getItem('game_ranks') || '[]');
-            let filtered = records.filter(r => r.type === type).sort((a,b) => a.time - b.time);
-            
-            let html = '';
-            filtered.forEach((r, i) => {
-                html += `<tr>
-                    <td>${i+1}</td>
-                    <td>${r.info}</td>
-                    <td>${formatTime(r.time)}</td>
-                    <td>${r.date}</td>
-                </tr>`;
-            });
-            document.getElementById('rank-body').innerHTML = html || '<tr><td colspan="4">尚無紀錄</td></tr>';
+            const typeFilter = document.getElementById('rank-type-filter').value;
+            const records = JSON.parse(localStorage.getItem('game_ranks') || '[]');
+            const list = document.getElementById('rank-list');
+            list.innerHTML = '';
+
+            records
+                .filter(r => r.type === typeFilter)
+                .sort((a, b) => a.sec - b.sec)
+                .forEach(r => {
+                    const row = `<tr>
+                        <td>${r.size}x${r.size}</td>
+                        <td>${r.diff}</td>
+                        <td>${r.sec}s</td>
+                        <td>${r.date}</td>
+                    </tr>`;
+                    list.innerHTML += row;
+                });
         }
     </script>
 </body>
