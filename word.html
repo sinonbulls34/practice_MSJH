@@ -3,442 +3,502 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國文近似字挑戰- 嘉義市民生國中不分類資源班</title>
+    <title>中文近似字挑戰- 嘉義市民生國中不分類資源班</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg: #0f172a;
+            --bg-dark: #0f172a;
             --card-bg: #1e293b;
-            --primary: #38bdf8; /* 霓虹藍 - 配對 */
-            --secondary: #fbbf24; /* 金黃 - 尋找 */
-            --accent: #f472b6; /* 粉色 - 排名 */
-            --text: #f8fafc;
-            --correct: #4ade80;
-            --wrong: #f87171;
+            --primary-glow: #38bdf8;
+            --secondary-glow: #fbbf24;
+            --accent-green: #4ade80;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
         }
 
-        * { box-sizing: border-box; transition: all 0.3s ease; }
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+
         body {
-            font-family: "SF Pro Display", "PingFang TC", "微軟正黑體", sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
             margin: 0;
-            padding: 0;
-            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* 介面框架 */
-        .container {
-            width: 100%;
-            max-width: 600px;
+        /* 標題設計 */
+        header {
             padding: 20px;
-            padding-bottom: 100px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
+            background: linear-gradient(180deg, #1e293b 0%, transparent 100%);
+            width: 100%;
         }
-        .container.active { display: flex; animation: fadeIn 0.5s; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--primary-glow);
+            color: var(--primary-glow);
+        }
 
-        h1 { font-size: 2rem; letter-spacing: 2px; margin-bottom: 10px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
-
-        /* 頂部控制列 */
-        .control-panel {
+        /* 控制區 */
+        .controls {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 16px;
-            width: 100%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .row { display: flex; gap: 10px; margin-bottom: 10px; justify-content: center; }
+
         select, button {
-            background: #334155;
+            background: #0f172a;
             color: white;
-            border: 1px solid #475569;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
+            border: 1px solid #334155;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
         }
-        button.start-btn { background: var(--primary); border: none; font-weight: bold; width: 100%; margin-top: 10px; color: var(--bg); }
-        button.start-btn:hover { transform: scale(1.02); filter: brightness(1.2); }
+
+        button.start-btn {
+            background: var(--primary-glow);
+            color: #0f172a;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            padding: 8px 20px;
+        }
+
+        button.start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
 
         /* 計時器 */
-        .status-bar { display: flex; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .timer-box { font-family: monospace; font-size: 1.5rem; color: var(--secondary); background: rgba(0,0,0,0.2); padding: 5px 15px; border-radius: 20px; }
+        .timer-box {
+            font-size: 1.2rem;
+            font-family: 'Courier New', monospace;
+            color: var(--secondary-glow);
+            margin-bottom: 10px;
+            background: #000;
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--secondary-glow);
+        }
 
         /* 遊戲網格 */
-        .grid {
+        #game-container {
+            flex-grow: 1;
+            width: 95%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        #grid {
             display: grid;
             gap: 8px;
-            background: rgba(255,255,255,0.05);
-            padding: 10px;
-            border-radius: 12px;
+            background: #334155;
+            padding: 8px;
+            border-radius: 8px;
             width: 100%;
-            aspect-ratio: 1/1;
+            aspect-ratio: 1 / 1;
         }
+
         .tile {
             background: var(--card-bg);
-            border: 1px solid #475569;
-            border-radius: 8px;
+            border-radius: 4px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2rem;
+            font-size: 24px;
             cursor: pointer;
             user-select: none;
-            position: relative;
+            border: 1px solid #475569;
         }
-        .tile:hover { background: #334155; border-color: var(--primary); }
-        .tile.selected { background: var(--primary); color: var(--bg); transform: scale(0.95); }
-        .tile.matched { opacity: 0; pointer-events: none; }
-        .tile.found { background: var(--correct) !important; color: var(--bg); }
 
-        /* 排行榜 */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; color: var(--accent); padding: 10px; border-bottom: 2px solid #334155; }
-        td { padding: 10px; border-bottom: 1px solid #334155; font-size: 0.9rem; }
+        .tile:hover {
+            background: #334155;
+            border-color: var(--primary-glow);
+        }
 
-        /* 底部導航 */
-        .nav-bar {
+        .tile.selected {
+            background: var(--primary-glow);
+            color: #000;
+        }
+
+        .tile.correct {
+            animation: pulse 0.3s;
+            visibility: hidden;
+        }
+
+        .tile.wrong {
+            background: #ef4444;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        /* 分頁欄 */
+        .tab-bar {
             position: fixed;
             bottom: 0;
             width: 100%;
+            height: 65px;
             background: #1e293b;
             display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
-            z-index: 100;
+            border-top: 1px solid #334155;
         }
-        .nav-item { cursor: pointer; display: flex; flex-direction: column; align-items: center; font-size: 0.8rem; color: #94a3b8; }
-        .nav-item.active { color: var(--primary); }
-        .nav-icon { font-size: 1.5rem; margin-bottom: 4px; }
 
-        /* 慶祝特效 */
-        #celebration {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 999;
-            display: none;
+        .tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-dim);
+            cursor: pointer;
         }
-        .confetti {
-            position: absolute; width: 10px; height: 10px;
-            background: var(--primary);
-            animation: fall 3s linear infinite;
-        }
-        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
 
-        /* 難度標籤顏色 */
-        .diff-easy { color: #4ade80; }
-        .diff-normal { color: #fbbf24; }
-        .diff-hard { color: #f87171; }
+        .tab.active {
+            color: var(--primary-glow);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .tab-icon { font-size: 20px; margin-bottom: 4px; }
+
+        /* 排行榜頁面 */
+        .page { display: none; width: 100%; padding: 20px; max-width: 800px; }
+        .page.active { display: block; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+
+        th { background: #0f172a; color: var(--primary-glow); }
+
     </style>
 </head>
 <body>
 
-    <div id="celebration"></div>
+    <header>
+        <h1 id="page-title">相似字配對挑戰</h1>
+    </header>
 
-    <div id="page-pair" class="container active">
-        <h1>🧩 相似字配對</h1>
-        <div class="control-panel">
-            <div class="row">
-                <select id="pair-size">
-                    <option value="2">2x2 表格</option>
-                    <option value="4" selected>4x4 表格</option>
-                    <option value="6">6x6 表格</option>
-                    <option value="8">8x8 表格</option>
-                </select>
-                <select id="pair-diff">
-                    <option value="easy">難度：輕鬆</option>
-                    <option value="normal" selected>難度：一般</option>
-                    <option value="hard">難度：挑戰</option>
-                </select>
-            </div>
-            <button class="start-btn" onclick="initPairGame()">開始挑戰</button>
+    <div id="game-page" class="page active">
+        <div class="controls">
+            <select id="grid-size">
+                <option value="2">2x2 表格</option>
+                <option value="4" selected>4x4 表格</option>
+                <option value="6">6x6 表格</option>
+                <option value="8">8x8 表格</option>
+            </select>
+            <select id="diff">
+                <option value="easy">輕鬆</option>
+                <option value="normal" selected>一般</option>
+                <option value="hard">挑戰</option>
+            </select>
+            <button class="start-btn" onclick="initMatching()">開始遊戲</button>
         </div>
-        <div class="status-bar">
-            <span>剩餘對數：<span id="pair-remain">0</span></span>
-            <div class="timer-box" id="pair-timer">0s</div>
+        <center><div class="timer-box" id="timer">準備就緒</div></center>
+        <div id="game-container">
+            <div id="grid"></div>
         </div>
-        <div class="grid" id="pair-grid"></div>
     </div>
 
-    <div id="page-search" class="container">
-        <h1>🔍 漢字找不同</h1>
-        <div class="control-panel">
-            <div class="row">
-                <select id="search-size">
-                    <option value="2">2x2 表格</option>
-                    <option value="5">5x5 表格</option>
-                    <option value="8" selected>8x8 表格</option>
-                    <option value="10">10x10 表格</option>
-                </select>
-                <select id="search-diff">
-                    <option value="easy">難度：輕鬆</option>
-                    <option value="normal" selected>難度：一般</option>
-                    <option value="hard">難度：挑戰</option>
-                </select>
-            </div>
-            <button class="start-btn" style="background: var(--secondary);" onclick="initSearchGame()">尋找目標</button>
+    <div id="search-page" class="page">
+        <div class="controls">
+            <select id="search-size">
+                <option value="2">2x2</option>
+                <option value="5">5x5</option>
+                <option value="8">8x8</option>
+                <option value="10">10x10</option>
+            </select>
+            <select id="search-diff">
+                <option value="easy">輕鬆</option>
+                <option value="normal" selected>一般</option>
+                <option value="hard">挑戰</option>
+            </select>
+            <button class="start-btn" onclick="initSearch()">開始挑戰</button>
         </div>
-        <div class="status-bar">
-            <span>目標：找出那顆「異類」</span>
-            <div class="timer-box" id="search-timer" style="color:var(--secondary)">0s</div>
+        <center><div class="timer-box" id="search-timer">準備就緒</div></center>
+        <div id="search-container" style="width:100%; display: flex; justify-content: center;">
+            <div id="search-grid" style="display: grid; gap: 5px; background: #334155; padding: 8px; border-radius: 8px; width: 100%; aspect-ratio: 1/1;"></div>
         </div>
-        <div class="grid" id="search-grid"></div>
     </div>
 
-    <div id="page-rank" class="container">
-        <h1>🏆 英雄榜</h1>
-        <div class="control-panel">
-            <select id="rank-mode-filter" onchange="updateRankTable()" style="width:100%">
-                <option value="pair">配對挑戰紀錄</option>
-                <option value="search">尋找挑戰紀錄</option>
+    <div id="rank-page" class="page">
+        <div class="controls">
+            <select id="rank-type" onchange="showRank()">
+                <option value="match">配對模式</option>
+                <option value="search">尋找模式</option>
             </select>
         </div>
         <table id="rank-table">
             <thead>
                 <tr>
-                    <th>模式/規格</th>
-                    <th>難度</th>
+                    <th>名次</th>
+                    <th>規模/難度</th>
                     <th>時間</th>
                     <th>日期</th>
                 </tr>
             </thead>
-            <tbody id="rank-list"></tbody>
+            <tbody id="rank-body"></tbody>
         </table>
     </div>
 
-    <div class="nav-bar">
-        <div class="nav-item active" onclick="showPage('pair')">
-            <span class="nav-icon">🧩</span>
-            <span>配對</span>
+    <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('game')">
+            <span class="tab-icon">🧩</span><span>配對</span>
         </div>
-        <div class="nav-item" onclick="showPage('search')">
-            <span class="nav-icon">🔍</span>
-            <span>尋找</span>
+        <div class="tab" onclick="switchTab('search')">
+            <span class="tab-icon">🔍</span><span>尋找</span>
         </div>
-        <div class="nav-item" onclick="showPage('rank')">
-            <span class="nav-icon">🏆</span>
-            <span>排名</span>
+        <div class="tab" onclick="switchTab('rank')">
+            <span class="tab-icon">🏆</span><span>排名</span>
         </div>
     </div>
 
     <script>
-        // --- 資料設定 ---
-        const charData = {
-            easy: [["大", "太"], ["人", "入"], ["日", "曰"], ["口", "口"], ["土", "士"], ["八", "人"]],
-            normal: [["國", "圍"], ["己", "已", "巳"], ["耍", "要"], ["免", "兔"], ["廷", "延"], ["崇", "嵩"]],
-            hard: [["贏", "羸", "蠃"], ["辨", "辯", "辦", "瓣"], ["膏", "肓"], ["戌", "戍", "戎"], ["魑", "魅", "魍", "魎"]]
+        // --- 題庫豐富化 ---
+        const similarityPool = {
+            easy: [
+                ['大', '太', '犬'], ['日', '曰', '目'], ['己', '已', '巳'], ['人', '入', '八'],
+                ['土', '士'], ['干', '千', '于'], ['口', '回'], ['由', '甲', '申']
+            ],
+            normal: [
+                ['國', '圍', '圖', '圈'], ['戊', '戌', '戍', '戎', '戒'], ['買', '賣'], ['免', '兔'],
+                ['侍', '恃', '待', '持'], ['拆', '折', '析'], ['汩', '汨'], ['梁', '粱'],
+                ['幕', '慕', '墓', '暮'], ['崇', '祟'], ['廷', '延']
+            ],
+            hard: [
+                ['辨', '辯', '辦', '瓣', '辮'], ['贏', '羸', '蠃', '贏'], ['璧', '壁', '劈', '霹'],
+                ['膏', '肓', '育'], ['冀', '翼'], ['黌', '黽'], ['魑', '魅', '魍', '魎'],
+                ['贏', '蠃'], ['鬱', '籲'], ['髒', '臟']
+            ]
         };
 
-        let timer = null;
-        let seconds = 0;
-        let currentMode = 'pair';
-        let firstTile = null;
-        let isProcessing = false;
+        let timerInt;
+        let startTime;
+        let currentMode = 'match';
 
-        // --- 核心功能 ---
-
-        function showPage(page) {
-            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(`page-${page}`).classList.add('active');
-            event.currentTarget.classList.add('active');
-            currentMode = page;
-            if(page === 'rank') updateRankTable();
-            resetGameUI();
+        function switchTab(tab) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            clearInterval(timerInt);
+            
+            if(tab === 'game') {
+                document.getElementById('game-page').classList.add('active');
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('page-title').innerText = "相似字配對挑戰";
+            } else if(tab === 'search') {
+                document.getElementById('search-page').classList.add('active');
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('page-title').innerText = "找出不一樣的字";
+            } else {
+                document.getElementById('rank-page').classList.add('active');
+                document.querySelectorAll('.tab')[2].classList.add('active');
+                document.getElementById('page-title').innerText = "榮譽排行榜";
+                showRank();
+            }
         }
 
-        function formatTime(s) {
-            if (s < 60) return `${s}s`;
-            return `${Math.floor(s/60)}m ${s%60}s`;
-        }
-
-        function resetGameUI() {
-            clearInterval(timer);
-            seconds = 0;
-            document.getElementById('pair-timer').innerText = "0s";
-            document.getElementById('search-timer').innerText = "0s";
-            isProcessing = false;
+        function formatTime(ms) {
+            let s = Math.floor(ms / 1000);
+            if (s < 60) return `${s} 秒`;
+            return `${Math.floor(s/60)} 分 ${s%60} 秒`;
         }
 
         function startTimer(displayId) {
-            clearInterval(timer);
-            seconds = 0;
-            timer = setInterval(() => {
-                seconds++;
-                document.getElementById(displayId).innerText = formatTime(seconds);
-            }, 1000);
+            startTime = Date.now();
+            timerInt = setInterval(() => {
+                let diff = Date.now() - startTime;
+                document.getElementById(displayId).innerText = formatTime(diff);
+            }, 100);
         }
 
-        // --- 配對遊戲邏輯 ---
-        function initPairGame() {
-            resetGameUI();
-            const size = parseInt(document.getElementById('pair-size').value);
-            const diff = document.getElementById('pair-diff').value;
-            const grid = document.getElementById('pair-grid');
+        // --- 配對模式邏輯 ---
+        let firstTile = null;
+        let pairsLeft = 0;
+
+        function initMatching() {
+            const size = parseInt(document.getElementById('grid-size').value);
+            const diff = document.getElementById('diff').value;
+            const grid = document.getElementById('grid');
             grid.innerHTML = '';
             grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-
-            let pairsCount = (size * size) / 2;
-            let pool = [];
             
-            // 隨機選取相似組
-            let subPool = charData[diff].flat();
-            for(let i=0; i<pairsCount; i++) {
-                let char = subPool[Math.floor(Math.random() * subPool.length)];
-                pool.push(char, char);
+            let total = size * size;
+            pairsLeft = total / 2;
+            let chars = [];
+            
+            let sets = [...similarityPool[diff]];
+            for(let i=0; i<pairsLeft; i++) {
+                let set = sets[Math.floor(Math.random() * sets.length)];
+                let char = set[Math.floor(Math.random() * set.length)];
+                chars.push(char, char);
             }
-            pool = pool.sort(() => Math.random() - 0.5);
+            chars.sort(() => Math.random() - 0.5);
 
-            pool.forEach((char, i) => {
+            chars.forEach(c => {
                 const div = document.createElement('div');
                 div.className = 'tile';
-                div.innerText = char;
-                div.onclick = () => handlePairClick(div);
+                div.innerText = c;
+                div.onclick = () => handleMatch(div);
                 grid.appendChild(div);
             });
-
-            document.getElementById('pair-remain').innerText = pairsCount;
-            startTimer('pair-timer');
+            
+            startTimer('timer');
         }
 
-        function handlePairClick(el) {
-            if(isProcessing || el.classList.contains('selected') || el.classList.contains('matched')) return;
-
-            el.classList.add('selected');
+        function handleMatch(tile) {
+            if(tile.classList.contains('correct') || tile === firstTile) return;
+            tile.classList.add('selected');
 
             if(!firstTile) {
-                firstTile = el;
+                firstTile = tile;
             } else {
-                isProcessing = true;
-                if(firstTile.innerText === el.innerText) {
+                if(firstTile.innerText === tile.innerText) {
+                    let a = firstTile, b = tile;
                     setTimeout(() => {
-                        firstTile.classList.add('matched');
-                        el.classList.add('matched');
-                        firstTile = null;
-                        isProcessing = false;
-                        let remain = parseInt(document.getElementById('pair-remain').innerText) - 1;
-                        document.getElementById('pair-remain').innerText = remain;
-                        if(remain === 0) winGame('pair');
-                    }, 300);
+                        a.classList.add('correct');
+                        b.classList.add('correct');
+                    }, 200);
+                    pairsLeft--;
+                    if(pairsLeft === 0) win('match');
                 } else {
+                    let a = firstTile, b = tile;
                     setTimeout(() => {
-                        firstTile.classList.remove('selected');
-                        el.classList.remove('selected');
-                        firstTile = null;
-                        isProcessing = false;
-                    }, 500);
+                        a.classList.remove('selected');
+                        b.classList.remove('selected');
+                        b.classList.add('wrong');
+                        setTimeout(() => b.classList.remove('wrong'), 300);
+                    }, 400);
                 }
+                firstTile = null;
             }
         }
 
-        // --- 尋找遊戲邏輯 ---
-        function initSearchGame() {
-            resetGameUI();
+        // --- 尋找模式邏輯 ---
+        function initSearch() {
             const size = parseInt(document.getElementById('search-size').value);
             const diff = document.getElementById('search-diff').value;
             const grid = document.getElementById('search-grid');
             grid.innerHTML = '';
             grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+            
+            let sets = [...similarityPool[diff]];
+            let targetSet = sets[Math.floor(Math.random()*sets.length)];
+            
+            // 挑選兩個不一樣但相似的字
+            let mainChar, diffChar;
+            if(targetSet.length >= 2) {
+                let temp = [...targetSet].sort(() => Math.random() - 0.5);
+                mainChar = temp[0];
+                diffChar = temp[1];
+            } else {
+                mainChar = targetSet[0];
+                diffChar = '？'; 
+            }
 
-            // 隨機選一組相似字
-            const group = charData[diff][Math.floor(Math.random() * charData[diff].length)];
-            const mainChar = group[0];
-            const oddChar = group[Math.floor(Math.random() * (group.length - 1)) + 1] || group[1] || group[0];
+            let diffIndex = Math.floor(Math.random() * (size * size));
 
-            let tiles = new Array(size * size).fill(mainChar);
-            const oddIndex = Math.floor(Math.random() * tiles.length);
-            tiles[oddIndex] = oddChar;
-
-            tiles.forEach((char, i) => {
+            for(let i=0; i < size*size; i++) {
                 const div = document.createElement('div');
                 div.className = 'tile';
-                div.innerText = char;
-                if(i === oddIndex) {
-                    div.onclick = () => { div.classList.add('found'); winGame('search'); };
-                } else {
-                    div.onclick = () => { 
-                        div.style.background = 'var(--wrong)';
-                        setTimeout(() => div.style.background = '', 300);
-                    };
-                }
+                div.style.fontSize = size > 8 ? '16px' : '24px';
+                div.innerText = (i === diffIndex) ? diffChar : mainChar;
+                div.onclick = () => {
+                    if(i === diffIndex) {
+                        div.style.background = 'var(--accent-green)';
+                        win('search');
+                    } else {
+                        div.classList.add('wrong');
+                        setTimeout(() => div.classList.remove('wrong'), 300);
+                    }
+                };
                 grid.appendChild(div);
-            });
+            }
             startTimer('search-timer');
         }
 
-        // --- 勝利與紀錄 ---
-        function winGame(mode) {
-            clearInterval(timer);
-            const size = document.getElementById(`${mode}-size`).value;
-            const diff = document.getElementById(`${mode}-diff`).value;
+        function win(type) {
+            clearInterval(timerInt);
+            let duration = Date.now() - startTime;
             
+            // 慶祝動畫
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#38bdf8', '#fbbf24', '#4ade80']
+            });
+
             // 儲存紀錄
-            const records = JSON.parse(localStorage.getItem('game_ranks') || '[]');
-            const newRecord = {
-                mode: mode,
-                spec: `${size}x${size}`,
-                diff: diff,
-                time: seconds,
-                date: new Date().toLocaleString('zh-TW', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})
-            };
-            records.push(newRecord);
+            let size = type === 'match' ? document.getElementById('grid-size').value : document.getElementById('search-size').value;
+            let diff = type === 'match' ? document.getElementById('diff').value : document.getElementById('search-diff').value;
+            
+            let records = JSON.parse(localStorage.getItem('game_ranks') || '[]');
+            records.push({
+                type,
+                info: `${size}x${size} (${diff})`,
+                time: duration,
+                date: new Date().toLocaleString()
+            });
             localStorage.setItem('game_ranks', JSON.stringify(records));
 
-            playCelebration();
-            setTimeout(() => alert(`🎉 完美達成！\n耗時：${formatTime(seconds)}`), 500);
+            setTimeout(() => alert(`挑戰成功！花費時間：${formatTime(duration)}`), 500);
         }
 
-        function playCelebration() {
-            const container = document.getElementById('celebration');
-            container.style.display = 'block';
-            container.innerHTML = '';
-            for(let i=0; i<100; i++) {
-                const c = document.createElement('div');
-                c.className = 'confetti';
-                c.style.left = Math.random() * 100 + 'vw';
-                c.style.background = `hsl(${Math.random()*360}, 70%, 60%)`;
-                c.style.animationDelay = Math.random() * 2 + 's';
-                container.appendChild(c);
-            }
-            setTimeout(() => container.style.display = 'none', 4000);
-        }
-
-        function updateRankTable() {
-            const filterMode = document.getElementById('rank-mode-filter').value;
-            const records = JSON.parse(localStorage.getItem('game_ranks') || '[]');
-            const list = document.getElementById('rank-list');
-            list.innerHTML = '';
-
-            const filtered = records
-                .filter(r => r.mode === filterMode)
-                .sort((a, b) => a.time - b.time);
-
-            filtered.forEach(r => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${r.spec}</td>
-                    <td class="diff-${r.diff}">${r.diff.toUpperCase()}</td>
+        function showRank() {
+            let type = document.getElementById('rank-type').value;
+            let records = JSON.parse(localStorage.getItem('game_ranks') || '[]');
+            let filtered = records.filter(r => r.type === type).sort((a,b) => a.time - b.time);
+            
+            let html = '';
+            filtered.forEach((r, i) => {
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td>${r.info}</td>
                     <td>${formatTime(r.time)}</td>
                     <td>${r.date}</td>
-                `;
-                list.appendChild(tr);
+                </tr>`;
             });
+            document.getElementById('rank-body').innerHTML = html || '<tr><td colspan="4">尚無紀錄</td></tr>';
         }
-
-        // 初始化
-        window.onload = () => {
-            initPairGame();
-        };
-
     </script>
 </body>
 </html>
